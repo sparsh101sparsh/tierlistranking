@@ -8,6 +8,9 @@ import { renderTierBoardToCanvas } from './utils/canvasExport';
 
 const STORAGE_KEY_ITEMS = 'tier_ranker_items_v1';
 const STORAGE_KEY_TIERS = 'tier_ranker_tiers_v1';
+const STORAGE_KEY_COL_WIDTH = 'tier_ranker_col_width_v1';
+const DEFAULT_COL_WIDTH = 340;
+const MIN_COL_WIDTH = 220;
 
 export function App() {
   const [tiers, setTiers] = useState<TierDefinition[]>(() => {
@@ -52,9 +55,63 @@ export function App() {
     return false;
   });
 
+  const [columnWidth, setColumnWidth] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_COL_WIDTH);
+        if (saved) {
+          const parsed = Number(saved);
+          if (!isNaN(parsed) && parsed >= MIN_COL_WIDTH) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load column width from cache:', e);
+      }
+    }
+    return DEFAULT_COL_WIDTH;
+  });
+  const [isResizing, setIsResizing] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const unrankedItems = items.filter((item) => item.tierId === null);
+
+  // Automatically persist column width
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_COL_WIDTH, String(columnWidth));
+    } catch (e) {
+      console.warn('Failed to save column width to cache:', e);
+    }
+  }, [columnWidth]);
+
+  // Resizing mouse drag handlers
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+
+    const startX = e.clientX;
+    const startWidth = columnWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      // The unranked column is on the right side of the screen
+      // Dragging left (moveEvent.clientX < startX) increases sidebar width
+      const deltaX = startX - moveEvent.clientX;
+      const maxColWidth = Math.floor(window.innerWidth * 0.7);
+      const newWidth = Math.min(Math.max(startWidth + deltaX, MIN_COL_WIDTH), maxColWidth);
+      setColumnWidth(newWidth);
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [columnWidth]);
 
   // Automatically persist items and tiers to localStorage
   useEffect(() => {
@@ -281,8 +338,35 @@ export function App() {
         />
       </main>
 
+      {/* ================= Fullscreen capture overlay during resize ================= */}
+      {isResizing && (
+        <div
+          className="fixed inset-0 z-50 cursor-col-resize select-none pointer-events-auto"
+        />
+      )}
+
+      {/* ================= Draggable Vertical Resizer Handle ================= */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-valuenow={columnWidth}
+        title="Drag to resize column • Double-click to reset"
+        onMouseDown={startResizing}
+        onDoubleClick={() => setColumnWidth(DEFAULT_COL_WIDTH)}
+        className={`w-2 hover:w-2.5 h-full cursor-col-resize select-none shrink-0 z-30 flex items-center justify-center transition-all group relative border-l border-r border-black ${
+          isResizing ? 'bg-amber-400 w-2.5' : 'bg-[#0d0d0e] hover:bg-amber-400 active:bg-amber-400'
+        }`}
+      >
+        <div
+          className={`w-0.5 h-7 rounded transition-colors ${
+            isResizing ? 'bg-black' : 'bg-neutral-600 group-hover:bg-black'
+          }`}
+        />
+      </div>
+
       {/* ================= Right Drag & Drop Ranking Column ================= */}
       <UnrankedColumn
+        width={columnWidth}
         unrankedItems={unrankedItems}
         tiers={tiers}
         onAddItem={handleAddItem}

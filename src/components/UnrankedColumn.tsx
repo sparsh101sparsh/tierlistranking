@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { TierItem, TierDefinition } from '../types';
 
 interface UnrankedColumnProps {
+  width?: number;
   unrankedItems: TierItem[];
   tiers: TierDefinition[];
   onAddItem: (title: string) => void;
@@ -189,6 +190,7 @@ const UnrankedCard: React.FC<{
 };
 
 export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
+  width,
   unrankedItems,
   tiers,
   onAddItem,
@@ -265,40 +267,42 @@ export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`w-72 sm:w-80 md:w-96 h-full bg-[#18181a] border-l-2 border-black flex flex-col select-none shrink-0 z-20 ${
+      style={width ? { width: `${width}px`, minWidth: `${width}px`, maxWidth: `${width}px` } : undefined}
+      className={`${width ? '' : 'w-72 sm:w-80 md:w-96'} h-full bg-[#18181a] flex flex-col select-none shrink-0 z-20 ${
         isDragOverColumn ? 'bg-[#222228]' : ''
       }`}
     >
       {/* Top Header & Actions */}
-      <div className="px-3.5 py-2.5 bg-black border-b-2 border-black flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="px-2.5 py-2 bg-black border-b-2 border-black flex items-center justify-between shrink-0 gap-1">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className="font-black text-xs uppercase tracking-wider text-neutral-100">
             Unranked
           </span>
-          <span className="bg-red-600 text-white text-[11px] font-mono font-bold px-2 py-0.5">
+          <span className="bg-red-600 text-white text-[11px] font-mono font-bold px-1.5 py-0.5">
             {unrankedItems.length}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={onToggleFullscreen}
-            className={`text-xs font-bold px-2.5 py-1.5 border transition-colors ${
+            className={`text-xs font-bold px-2 py-1 border transition-colors ${
               isFullscreen
                 ? 'bg-amber-400 text-black border-black'
                 : 'bg-[#1e1e24] text-neutral-300 hover:text-white border-neutral-700'
             }`}
             title="Toggle Fullscreen (F)"
           >
-            {isFullscreen ? 'Exit' : 'Fullscreen'}
+            {isFullscreen ? 'Exit' : width && width < 310 ? 'Full' : 'Fullscreen'}
           </button>
 
           <button
             type="button"
             onClick={onExportImage}
             disabled={isExporting}
-            className="text-xs font-bold px-2.5 py-1.5 bg-[#1e1e24] text-neutral-300 hover:text-white border border-neutral-700 disabled:opacity-40"
+            className="text-xs font-bold px-2 py-1 bg-[#1e1e24] text-neutral-300 hover:text-white border border-neutral-700 disabled:opacity-40"
+            title="Export PNG"
           >
             {isExporting ? '...' : 'Export'}
           </button>
@@ -306,7 +310,7 @@ export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
           <button
             type="button"
             onClick={onReset}
-            className="text-xs font-bold px-2.5 py-1.5 bg-[#1e1e24] text-neutral-400 hover:text-red-400 border border-neutral-700 hover:border-red-500"
+            className="text-xs font-bold px-2 py-1 bg-[#1e1e24] text-neutral-400 hover:text-red-400 border border-neutral-700 hover:border-red-500"
             title="Clear all cards"
           >
             Clear
@@ -315,29 +319,29 @@ export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
       </div>
 
       {/* Input box to add what to rank */}
-      <div className="p-3 border-b-2 border-black bg-[#141416] shrink-0">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="p-2.5 border-b-2 border-black bg-[#141416] shrink-0">
+        <form onSubmit={handleSubmit} className="flex gap-1.5">
           <input
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="Type what to rank & press Enter..."
-            className="flex-1 min-w-0 bg-black border border-neutral-700 focus:border-white text-white px-3 py-2 text-sm outline-none font-sans placeholder:text-neutral-500"
+            placeholder={width && width < 300 ? 'Type to rank...' : 'Type what to rank & Enter...'}
+            className="flex-1 min-w-0 bg-black border border-neutral-700 focus:border-white text-white px-2.5 py-1.5 text-xs sm:text-sm outline-none font-sans placeholder:text-neutral-500"
           />
           <button
             type="submit"
             disabled={!inputVal.trim()}
-            className="bg-white text-black font-black text-xs px-3.5 py-2 hover:bg-neutral-200 disabled:opacity-30 border border-black uppercase tracking-wider shrink-0"
+            className="bg-white text-black font-black text-xs px-2.5 py-1.5 hover:bg-neutral-200 disabled:opacity-30 border border-black uppercase tracking-wider shrink-0"
           >
             ADD
           </button>
           <button
             type="button"
             onClick={onOpenAddModal}
-            className="bg-[#222228] text-neutral-300 hover:text-white font-bold text-xs px-2.5 py-2 border border-neutral-700 hover:border-neutral-500 uppercase tracking-wider shrink-0"
+            className="bg-[#222228] text-neutral-300 hover:text-white font-bold text-xs px-2 py-1.5 border border-neutral-700 hover:border-neutral-500 uppercase tracking-wider shrink-0"
             title="Paste bulk list"
           >
-            + LIST
+            +LIST
           </button>
         </form>
       </div>
@@ -345,7 +349,17 @@ export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
       {/* Draggable cards grid in the stack */}
       <div className="flex-1 overflow-y-auto p-3">
         {unrankedItems.length > 0 && (
-          <div className="grid grid-cols-2 gap-2.5 items-start">
+          <div
+            className={`grid gap-2.5 items-start ${
+              !width || (width >= 290 && width < 480)
+                ? 'grid-cols-2'
+                : width < 290
+                ? 'grid-cols-1'
+                : width < 660
+                ? 'grid-cols-3'
+                : 'grid-cols-4'
+            }`}
+          >
             {unrankedItems.map((item) => (
               <UnrankedCard
                 key={item.id}
