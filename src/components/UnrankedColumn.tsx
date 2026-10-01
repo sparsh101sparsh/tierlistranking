@@ -325,7 +325,7 @@ export const UnrankedColumn: React.FC<UnrankedColumnProps> = ({
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder={width && width < 300 ? 'Type to rank...' : 'Type what to rank & Enter...'}
+            placeholder="Type what to rank"
             className="flex-1 min-w-0 bg-black border border-neutral-700 focus:border-white text-white px-2.5 py-1.5 text-xs sm:text-sm outline-none font-sans placeholder:text-neutral-500"
           />
           <button
