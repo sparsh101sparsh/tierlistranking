@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #111111;
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+/* Raw brutalist tier board borders */
+.tier-table {
+  border: 2px solid #000000;
+  background: #000000;
+}
+
+.tier-row {
+  border-bottom: 2px solid #000000;
+  background: #1e1a1b;
+}
+
+.tier-label {
+  border-right: 2px solid #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #222222;
+}
+
+/* Raw white cards matching Image 1 */
+.tier-card {
+  background: #ffffff;
+  border-right: 2px solid #000000;
+  color: #000000;
+  font-family: Impact, "Arial Black", Arial, sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.12;
+  cursor: grab;
+}
+
+.tier-card:active {
+  cursor: grabbing;
+}
+
+/* Clean macOS fan stack */
+.mac-fan-pill {
+  background: rgba(36, 36, 40, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  border-radius: 9999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.mac-fan-card {
+  background: #ffffff;
+  border: 2px solid #000000;
+  color: #000000;
+  font-family: Impact, "Arial Black", Arial, sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Smooth macOS fan animation */
+@keyframes fanRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-1 * var(--curve-x, 0px)), 50px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(calc(-1 * var(--curve-x, 0px)), 0, 0);
+  }
+}
+
+.animate-fan-rise {
+  animation: fanRise 0.2s ease-out forwards;
+}
